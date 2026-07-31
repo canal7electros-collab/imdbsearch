@@ -1,16 +1,7 @@
 [build]
-  command = "echo 'No build needed'"
   functions = "netlify/functions"
-  publish = "."
-
-[build.environment]
-  NODE_VERSION = "18"
 
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
-
-[[env.production]]
-[env.production.context.environment]
-  APIFY_API_KEY = "apify_api_EeKDiXe5OOvQGpsSav7DZOr4ByRQT93wgpjk"
