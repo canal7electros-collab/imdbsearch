@@ -1,4 +1,4 @@
-const APIFY_API_KEY = process.env.APIFY_API_KEY || 'apify_api_EeKDiXe5OOvQGpsSav7DZOr4ByRQT93wgpjk';
+const APIFY_API_KEY = process.env.APIFY_API_KEY || 'apify_api_aqUPfgOWbEaGSjRo9AtjZtwz2b8zf01y5nZ4';
 const APIFY_API_URL = 'https://api.apify.com/v2/acts/logiover~imdb-scraper/run-sync-get-dataset-items';
 
 exports.handler = async (event) => {
