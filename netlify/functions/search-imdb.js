@@ -36,7 +36,10 @@ exports.handler = async (event) => {
 
         const response = await fetch(APIFY_API_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${APIFY_API_KEY}`
+            },
             body: JSON.stringify(payload)
         });
 
