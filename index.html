@@ -3,41 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Trouvez les films en commun entre deux personnes du cinéma">
-    <meta name="theme-color" content="#1a1a1a">
     <title>FILM CROISÉ</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: #1a1a1a; color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; background: #1a1a1a; color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .container { max-width: 1200px; width: 100%; background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%); border-radius: 20px; padding: 60px 40px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); }
         .header { text-align: center; margin-bottom: 50px; border-top: 3px dashed #d4a574; border-bottom: 3px dashed #d4a574; padding: 30px 0; }
         .header h1 { font-size: 72px; font-weight: 900; letter-spacing: 4px; margin-bottom: 10px; }
-        .header h1 .gold { color: #d4a574; }
-        .header p { font-size: 16px; color: #aaa; font-weight: 300; }
-        .form-section { margin-bottom: 50px; }
+        .header .gold { color: #d4a574; }
+        .header p { font-size: 16px; color: #aaa; }
         .inputs-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
         .input-group { display: flex; flex-direction: column; }
-        .input-group label { font-size: 14px; font-weight: 600; letter-spacing: 2px; margin-bottom: 12px; color: #d4a574; text-transform: uppercase; }
-        .input-group input { padding: 16px 20px; border: 2px solid #444; border-radius: 8px; background: rgba(255, 255, 255, 0.03); color: #fff; font-size: 16px; transition: all 0.3s ease; font-family: inherit; }
-        .input-group input:focus { outline: none; border-color: #d4a574; background: rgba(255, 255, 255, 0.08); box-shadow: 0 0 20px rgba(212, 165, 116, 0.2); }
-        .search-btn { width: 100%; padding: 18px 40px; background: #d4a574; color: #1a1a1a; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(212, 165, 116, 0.3); }
-        .search-btn:hover:not(:disabled) { background: #e6b890; box-shadow: 0 15px 40px rgba(212, 165, 116, 0.4); transform: translateY(-2px); }
+        .input-group label { font-size: 12px; font-weight: 600; letter-spacing: 2px; margin-bottom: 12px; color: #d4a574; text-transform: uppercase; }
+        .input-group input { padding: 16px 20px; border: 2px solid #444; border-radius: 8px; background: rgba(255, 255, 255, 0.03); color: #fff; font-size: 16px; }
+        .input-group input:focus { outline: none; border-color: #d4a574; background: rgba(255, 255, 255, 0.08); }
+        .search-btn { width: 100%; padding: 18px 40px; background: #d4a574; color: #1a1a1a; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+        .search-btn:hover:not(:disabled) { background: #e6b890; transform: translateY(-2px); }
         .search-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .loading { text-align: center; font-size: 16px; color: #d4a574; margin-top: 30px; font-weight: 500; display: none; }
-        .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(212, 165, 116, 0.3); border-top-color: #d4a574; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px; vertical-align: middle; }
+        .loading { text-align: center; font-size: 16px; color: #d4a574; margin-top: 30px; display: none; }
+        .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(212, 165, 116, 0.3); border-top-color: #d4a574; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .results-section { margin-top: 50px; display: none; }
         .results-section.show { display: block; }
         .results-header { text-align: center; margin-bottom: 40px; font-size: 28px; font-weight: 600; }
         .results-header .names { color: #d4a574; }
         .films-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
-        .film-card { background: rgba(255, 255, 255, 0.05); border: 1px solid #444; border-radius: 12px; padding: 20px; transition: all 0.3s ease; }
-        .film-card:hover { border-color: #d4a574; background: rgba(212, 165, 116, 0.1); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(212, 165, 116, 0.2); }
+        .film-card { background: rgba(255, 255, 255, 0.05); border: 1px solid #444; border-radius: 12px; padding: 20px; }
+        .film-card:hover { border-color: #d4a574; background: rgba(212, 165, 116, 0.1); }
         .film-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #fff; }
-        .film-year { font-size: 14px; color: #d4a574; margin-bottom: 12px; font-weight: 600; }
-        .error-message { background: rgba(255, 100, 100, 0.1); border: 1px solid rgba(255, 100, 100, 0.5); color: #ff9999; padding: 20px; border-radius: 8px; margin-top: 30px; text-align: center; display: none; }
-        .info-text { text-align: center; color: #888; font-size: 12px; margin-top: 40px; padding-top: 20px; border-top: 1px dashed #444; }
-        @media (max-width: 768px) { .container { padding: 40px 25px; } .header h1 { font-size: 48px; } .inputs-wrapper { grid-template-columns: 1fr; gap: 20px; } .films-grid { grid-template-columns: 1fr; } }
+        .film-year { font-size: 14px; color: #d4a574; margin-bottom: 12px; }
+        .error { background: rgba(255, 100, 100, 0.1); border: 1px solid rgba(255, 100, 100, 0.5); color: #ff9999; padding: 20px; border-radius: 8px; margin-top: 30px; text-align: center; display: none; }
+        .info { text-align: center; color: #888; font-size: 12px; margin-top: 40px; padding-top: 20px; border-top: 1px dashed #444; }
     </style>
 </head>
 <body>
@@ -45,146 +41,90 @@
         <div class="header">
             <div style="font-size: 12px; letter-spacing: 3px; color: #d4a574; margin-bottom: 15px;">DONNÉES OFFICIELLES IMDB</div>
             <h1><span class="gold">FILM</span> CROISÉ</h1>
-            <p>Deux noms, une pellicule commune. Entrez deux personnes du cinéma et retrouvez tous les films où elles ont travaillé ensemble.</p>
+            <p>Deux noms, une pellicule commune.</p>
         </div>
 
-        <div class="form-section">
-            <div class="inputs-wrapper">
-                <div class="input-group">
-                    <label for="person1">Première personne</label>
-                    <input type="text" id="person1" placeholder="ex. Marion Cotillard" autocomplete="off">
-                </div>
-                <div class="input-group">
-                    <label for="person2">Deuxième personne</label>
-                    <input type="text" id="person2" placeholder="ex. Christoph Waltz" autocomplete="off">
-                </div>
+        <div class="inputs-wrapper">
+            <div class="input-group">
+                <label>Première personne</label>
+                <input type="text" id="person1" placeholder="ex. Marion Cotillard">
             </div>
-
-            <div style="text-align: center;">
-                <button class="search-btn" id="searchBtn">Trouver leurs films</button>
+            <div class="input-group">
+                <label>Deuxième personne</label>
+                <input type="text" id="person2" placeholder="ex. Christoph Waltz">
             </div>
         </div>
+
+        <button class="search-btn" id="searchBtn">Trouver leurs films</button>
 
         <div id="loadingSection" class="loading">
             <span class="spinner"></span>
-            Recherche en cours...
+            Recherche...
         </div>
 
         <div id="resultsSection" class="results-section">
-            <div class="results-header">
-                Films de <span class="names" id="resultNames"></span>
-            </div>
+            <div class="results-header">Films de <span class="names" id="resultNames"></span></div>
             <div id="filmsList" class="films-grid"></div>
         </div>
 
-        <div id="errorSection" class="error-message"></div>
-
-        <div class="info-text">
-            Information courtesy of IMDb (https://www.imdb.com). Used with permission.
-        </div>
+        <div id="errorSection" class="error"></div>
+        <div class="info">IMDb Data</div>
     </div>
 
     <script>
-        const API_ENDPOINT = '/.netlify/functions/search-imdb';
+        const API = '/.netlify/functions/search-imdb';
+        const p1 = document.getElementById('person1');
+        const p2 = document.getElementById('person2');
+        const btn = document.getElementById('searchBtn');
+        const loading = document.getElementById('loadingSection');
+        const results = document.getElementById('resultsSection');
+        const films = document.getElementById('filmsList');
+        const names = document.getElementById('resultNames');
+        const error = document.getElementById('errorSection');
 
-        const person1Input = document.getElementById('person1');
-        const person2Input = document.getElementById('person2');
-        const searchBtn = document.getElementById('searchBtn');
-        const loadingSection = document.getElementById('loadingSection');
-        const resultsSection = document.getElementById('resultsSection');
-        const filmsList = document.getElementById('filmsList');
-        const resultNames = document.getElementById('resultNames');
-        const errorSection = document.getElementById('errorSection');
+        btn.onclick = search;
 
-        searchBtn.addEventListener('click', searchCommonFilms);
-        person1Input.addEventListener('keypress', (e) => e.key === 'Enter' && searchCommonFilms());
-        person2Input.addEventListener('keypress', (e) => e.key === 'Enter' && searchCommonFilms());
-
-        async function searchCommonFilms() {
-            const name1 = person1Input.value.trim();
-            const name2 = person2Input.value.trim();
-
-            if (!name1 || !name2) {
-                showError('Veuillez entrer deux noms');
-                return;
-            }
-
-            if (name1.toLowerCase() === name2.toLowerCase()) {
-                showError('Entrez deux noms différents');
-                return;
-            }
-
-            searchBtn.disabled = true;
-            loadingSection.style.display = 'block';
-            resultsSection.classList.remove('show');
-            errorSection.style.display = 'none';
+        async function search() {
+            const n1 = p1.value.trim();
+            const n2 = p2.value.trim();
+            if (!n1 || !n2) { error.textContent = 'Deux noms!'; error.style.display = 'block'; return; }
+            
+            btn.disabled = true;
+            loading.style.display = 'block';
+            error.style.display = 'none';
 
             try {
-                const [id1, id2] = await Promise.all([
-                    searchPerson(name1),
-                    searchPerson(name2)
-                ]);
-
-                if (!id1) { showError(`Personne non trouvée: ${name1}`); return; }
-                if (!id2) { showError(`Personne non trouvée: ${name2}`); return; }
-
-                const [filmography1, filmography2] = await Promise.all([
-                    getFilmography(id1),
-                    getFilmography(id2)
-                ]);
-
-                if (filmography1.length === 0) { showError(`Aucune filmographie pour: ${name1}`); return; }
-                if (filmography2.length === 0) { showError(`Aucune filmographie pour: ${name2}`); return; }
-
-                const commonFilms = findCommonFilms(filmography1, filmography2, name1, name2);
-                if (commonFilms.length === 0) { showError(`Aucun film en commun`); return; }
-
-                displayResults(commonFilms, name1, name2);
-
-            } catch (error) {
-                showError(`Erreur: ${error.message}`);
+                const id1 = await searchPerson(n1);
+                const id2 = await searchPerson(n2);
+                if (!id1 || !id2) throw new Error('Personne non trouvée');
+                
+                const f1 = await getFilmography(id1);
+                const f2 = await getFilmography(id2);
+                
+                const common = [...new Map(f1.map(x => [x.id, x])).entries()].filter(([id]) => f2.some(x => x.id === id)).map(([,v]) => v);
+                if (!common.length) throw new Error('Aucun film en commun');
+                
+                names.textContent = `${n1} & ${n2}`;
+                films.innerHTML = common.sort((a,b) => (b.year||0)-(a.year||0)).map(f => `<div class="film-card"><div class="film-title">${f.title}</div>${f.year ? `<div class="film-year">${f.year}</div>` : ''}</div>`).join('');
+                results.classList.add('show');
+            } catch (e) {
+                error.textContent = e.message;
+                error.style.display = 'block';
             } finally {
-                searchBtn.disabled = false;
-                loadingSection.style.display = 'none';
+                btn.disabled = false;
+                loading.style.display = 'none';
             }
         }
 
         async function searchPerson(name) {
-            const res = await fetch(API_ENDPOINT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'search', query: name })
-            });
-            const data = await res.json();
-            return data.id || null;
+            const res = await fetch(API, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({action: 'search', query: name}) });
+            const d = await res.json();
+            return d.id;
         }
 
-        async function getFilmography(personId) {
-            const res = await fetch(API_ENDPOINT, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'filmography', personId })
-            });
+        async function getFilmography(id) {
+            const res = await fetch(API, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({action: 'filmography', personId: id}) });
             return await res.json();
-        }
-
-        function findCommonFilms(f1, f2, n1, n2) {
-            const m1 = new Map(f1.map(f => [f.id, f]));
-            const m2 = new Map(f2.map(f => [f.id, f]));
-            const commonIds = [...m1.keys()].filter(id => m2.has(id));
-            return commonIds.map(id => ({ id, title: m1.get(id).title, year: m1.get(id).year, n1, n2 })).sort((a, b) => (b.year || 0) - (a.year || 0));
-        }
-
-        function displayResults(films, n1, n2) {
-            resultNames.textContent = `${n1} & ${n2}`;
-            filmsList.innerHTML = films.map(f => `<div class="film-card"><div class="film-title">${f.title}</div>${f.year ? `<div class="film-year">${f.year}</div>` : ''}</div>`).join('');
-            resultsSection.classList.add('show');
-        }
-
-        function showError(msg) {
-            errorSection.textContent = msg;
-            errorSection.style.display = 'block';
-            resultsSection.classList.remove('show');
         }
     </script>
 </body>
