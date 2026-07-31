@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Trouvez les films en commun entre deux personnes du cinéma">
+    <meta name="theme-color" content="#1a1a1a">
+    <title>FILM CROISÉ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
+            border-radius: 20px;
+            padding: 60px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            border-top: 3px dashed #d4a574;
+            border-bottom: 3px dashed #d4a574;
+            padding: 30px 0;
+        }
+
+        .header h1 {
+            font-size: 72px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+        }
+
+        .header h1 .gold {
+            color: #d4a574;
+        }
+
+        .header p {
+            font-size: 16px;
+            color: #aaa;
+            font-weight: 300;
+        }
+
+        .form-section {
+            margin-bottom: 50px;
+        }
+
+        .inputs-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            color: #d4a574;
+            text-transform: uppercase;
+        }
+
+        .input-group input {
+            padding: 16px 20px;
+            border: 2px solid #444;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .input-group input::placeholder {
+            color: #666;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #d4a574;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 20px rgba(212, 165, 116, 0.2);
+        }
+
+        .button-section {
+            text-align: center;
+        }
+
+        .search-btn {
+            width: 100%;
+            padding: 18px 40px;
+            background: #d4a574;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(212, 165, 116, 0.3);
+        }
+
+        .search-btn:hover:not(:disabled) {
+            background: #e6b890;
+            box-shadow: 0 15px 40px rgba(212, 165, 116, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .search-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 16px;
+            color: #d4a574;
+            margin-top: 30px;
+            font-weight: 500;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(212, 165, 116, 0.3);
+            border-top-color: #d4a574;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            margin-top: 50px;
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .results-header .names {
+            color: #d4a574;
+        }
+
+        .films-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .film-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #444;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .film-card:hover {
+            border-color: #d4a574;
+            background: rgba(212, 165, 116, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(212, 165, 116, 0.2);
+        }
+
+        .film-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .film-year {
+            font-size: 14px;
+            color: #d4a574;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .film-roles {
+            font-size: 13px;
+            color: #aaa;
+            line-height: 1.6;
+        }
+
+        .role-label {
+            font-weight: 600;
+            color: #d4a574;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-top: 8px;
+            margin-bottom: 4px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #aaa;
+            font-size: 18px;
+        }
+
+        .error-message {
+            background: rgba(255, 100, 100, 0.1);
+            border: 1px solid rgba(255, 100, 100, 0.5);
+            color: #ff9999;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .info-text {
+            text-align: center;
+            color: #888;
+            font-size: 12px;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px dashed #444;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 25px;
+            }
+
+            .header h1 {
+                font-size: 48px;
+            }
+
+            .inputs-wrapper {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .films-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="font-size: 12px; letter-spacing: 3px; color: #d4a574; margin-bottom: 15px;">DONNÉES OFFICIELLES IMDB</div>
+            <h1><span class="gold">FILM</span> CROISÉ</h1>
+            <p>Deux noms, une pellicule commune. Entrez deux personnes du cinéma et retrouvez tous les films où elles ont travaillé ensemble.</p>
+        </div>
+
+        <div class="form-section">
+            <div class="inputs-wrapper">
+                <div class="input-group">
+                    <label for="person1">Première personne</label>
+                    <input 
+                        type="text" 
+                        id="person1" 
+                        placeholder="ex. Marion Cotillard"
+                        autocomplete="off"
+                    >
+                </div>
+                <div class="input-group">
+                    <label for="person2">Deuxième personne</label>
+                    <input 
+                        type="text" 
+                        id="person2" 
+                        placeholder="ex. Christoph Waltz"
+                        autocomplete="off"
+                    >
+                </div>
+            </div>
+
+            <div class="button-section">
+                <button class="search-btn" id="searchBtn">Trouver leurs films</button>
+            </div>
+        </div>
+
+        <div id="loadingSection" class="loading" style="display: none;">
+            <span class="spinner"></span>
+            Recherche en cours...
+        </div>
+
+        <div id="resultsSection" class="results-section">
+            <div class="results-header">
+                Films de <span class="names" id="resultNames"></span>
+            </div>
+            <div id="filmsList" class="films-grid"></div>
+        </div>
+
+        <div id="errorSection" class="error-message" style="display: none;"></div>
+
+        <div class="info-text">
+            Information courtesy of IMDb (https://www.imdb.com). Used with permission.<br>
+            Usage personnel / non-commercial, conformément à la licence des datasets IMDb.
+        </div>
+    </div>
+
+    <script>
+        // En développement local : http://localhost:8888/.netlify/functions/search-imdb
+        // En production (Netlify) : /.netlify/functions/search-imdb
+        const API_ENDPOINT = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8888/.netlify/functions/search-imdb'
+            : '/.netlify/functions/search-imdb';
+
+        const person1Input = document.getElementById('person1');
+        const person2Input = document.getElementById('person2');
+        const searchBtn = document.getElementById('searchBtn');
+        const loadingSection = document.getElementById('loadingSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const filmsList = document.getElementById('filmsList');
+        const resultNames = document.getElementById('resultNames');
+        const errorSection = document.getElementById('errorSection');
+
+        searchBtn.addEventListener('click', searchCommonFilms);
+        person1Input.addEventListener('keypress', (e) => e.key === 'Enter' && searchCommonFilms());
+        person2Input.addEventListener('keypress', (e) => e.key === 'Enter' && searchCommonFilms());
+
+        async function searchCommonFilms() {
+            const name1 = person1Input.value.trim();
+            const name2 = person2Input.value.trim();
+
+            if (!name1 || !name2) {
+                showError('Veuillez entrer deux noms');
+                return;
+            }
+
+            if (name1.toLowerCase() === name2.toLowerCase()) {
+                showError('Entrez deux noms différents');
+                return;
+            }
+
+            searchBtn.disabled = true;
+            loadingSection.style.display = 'block';
+            resultsSection.classList.remove('show');
+            errorSection.style.display = 'none';
+
+            try {
+                // Rechercher les deux personnes
+                const [person1Data, person2Data] = await Promise.all([
+                    searchPerson(name1),
+                    searchPerson(name2)
+                ]);
+
+                if (!person1Data) {
+                    showError(`Personne non trouvée: ${name1}`);
+                    return;
+                }
+
+                if (!person2Data) {
+                    showError(`Personne non trouvée: ${name2}`);
+                    return;
+                }
+
+                // Récupérer les filmographies
+                const [filmography1, filmography2] = await Promise.all([
+                    getFilmography(person1Data.id, person1Data.name),
+                    getFilmography(person2Data.id, person2Data.name)
+                ]);
+
+                // Trouver les films en commun
+                const commonFilms = findCommonFilms(
+                    filmography1,
+                    filmography2,
+                    person1Data.name,
+                    person2Data.name
+                );
+
+                if (commonFilms.length === 0) {
+                    showError(`Aucun film en commun entre ${name1} et ${name2}`);
+                    return;
+                }
+
+                displayResults(commonFilms, name1, name2);
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError(`Erreur lors de la recherche: ${error.message}`);
+            } finally {
+                searchBtn.disabled = false;
+                loadingSection.style.display = 'none';
+            }
+        }
+
+        async function searchPerson(name) {
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        mode: 'search',
+                        query: name,
+                        searchType: 'NAME',
+                        maxResults: 1
+                    })
+                });
+
+                if (!response.ok) throw new Error('Erreur API');
+
+                const data = await response.json();
+
+                if (!data || data.length === 0) return null;
+
+                // Trouver la première personne (pas une compagnie)
+                const person = data.find(item => item.id && item.id.startsWith('nm'));
+                return person ? { id: person.id, name: person.name || name } : null;
+
+            } catch (error) {
+                console.error('Erreur recherche personne:', error);
+                throw error;
+            }
+        }
+
+        async function getFilmography(personId, personName) {
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        mode: 'name',
+                        nameIds: [personId],
+                        maxResults: 500
+                    })
+                });
+
+                if (!response.ok) throw new Error('Erreur API');
+
+                const data = await response.json();
+
+                if (!data || data.length === 0) return [];
+
+                // Extraire les films depuis knownFor
+                const films = [];
+                data.forEach(item => {
+                    if (item.knownFor && Array.isArray(item.knownFor)) {
+                        item.knownFor.forEach(film => {
+                            films.push({
+                                id: film.id,
+                                title: film.title || film.name,
+                                year: film.year,
+                                type: film.type
+                            });
+                        });
+                    }
+                });
+
+                return films;
+
+            } catch (error) {
+                console.error(`Erreur filmographie ${personId}:`, error);
+                throw error;
+            }
+        }
+
+        function findCommonFilms(filmography1, filmography2, name1, name2) {
+            const films1Map = new Map();
+            const films2Map = new Map();
+
+            filmography1.forEach(film => {
+                if (film.id) films1Map.set(film.id, film);
+            });
+
+            filmography2.forEach(film => {
+                if (film.id) films2Map.set(film.id, film);
+            });
+
+            const commonIds = [...films1Map.keys()].filter(id => films2Map.has(id));
+
+            return commonIds.map(id => {
+                const film1 = films1Map.get(id);
+                const film2 = films2Map.get(id);
+
+                return {
+                    id: id,
+                    title: film1.title,
+                    year: film1.year,
+                    person1Name: name1,
+                    person2Name: name2
+                };
+            }).sort((a, b) => {
+                const yearA = a.year || 0;
+                const yearB = b.year || 0;
+                return yearB - yearA;
+            });
+        }
+
+        function displayResults(commonFilms, name1, name2) {
+            resultNames.textContent = `${name1} & ${name2}`;
+            filmsList.innerHTML = '';
+
+            commonFilms.forEach(film => {
+                const card = document.createElement('div');
+                card.className = 'film-card';
+                card.innerHTML = `
+                    <div class="film-title">${film.title || 'Film sans titre'}</div>
+                    ${film.year ? `<div class="film-year">${film.year}</div>` : ''}
+                    <div class="film-roles">
+                        <div class="role-label">Avec:</div>
+                        • ${film.person1Name}<br>
+                        • ${film.person2Name}
+                    </div>
+                `;
+                filmsList.appendChild(card);
+            });
+
+            resultsSection.classList.add('show');
+        }
+
+        function showError(message) {
+            errorSection.textContent = message;
+            errorSection.style.display = 'block';
+            resultsSection.classList.remove('show');
+        }
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript;base64,Ly8gU2ltcGxlIFNlcnZpY2UgV29ya2VyIGZvciBPZmZsaW5lIFN1cHBvcnQ=').catch(() => {});
+        }
+    </script>
+</body>
+</html>
