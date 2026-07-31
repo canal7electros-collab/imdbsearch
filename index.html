@@ -1,8 +1,3 @@
-bash
-
-cat /home/claude/film-croise.html
-Sortie
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -236,13 +231,6 @@ Sortie
             margin-bottom: 4px;
         }
 
-        .no-results {
-            text-align: center;
-            padding: 40px 20px;
-            color: #aaa;
-            font-size: 18px;
-        }
-
         .error-message {
             background: rgba(255, 100, 100, 0.1);
             border: 1px solid rgba(255, 100, 100, 0.5);
@@ -293,34 +281,20 @@ Sortie
         <div class="form-section">
             <div class="inputs-wrapper">
                 <div class="input-group">
-                    <label for="person1Name">Première personne - Nom</label>
+                    <label for="person1Name">Première personne</label>
                     <input 
                         type="text" 
                         id="person1Name" 
                         placeholder="ex. Marion Cotillard"
                         autocomplete="off"
                     >
-                    <label for="person1Id" style="margin-top: 12px; font-size: 12px; color: #999;">ID IMDb (nm...)</label>
-                    <input 
-                        type="text" 
-                        id="person1Id" 
-                        placeholder="ex. nm0001001"
-                        autocomplete="off"
-                    >
                 </div>
                 <div class="input-group">
-                    <label for="person2Name">Deuxième personne - Nom</label>
+                    <label for="person2Name">Deuxième personne</label>
                     <input 
                         type="text" 
                         id="person2Name" 
                         placeholder="ex. Christoph Waltz"
-                        autocomplete="off"
-                    >
-                    <label for="person2Id" style="margin-top: 12px; font-size: 12px; color: #999;">ID IMDb (nm...)</label>
-                    <input 
-                        type="text" 
-                        id="person2Id" 
-                        placeholder="ex. nm0000705"
                         autocomplete="off"
                     >
                 </div>
@@ -352,16 +326,12 @@ Sortie
     </div>
 
     <script>
-        // En développement local : http://localhost:8888/.netlify/functions/search-imdb
-        // En production (Netlify) : /.netlify/functions/search-imdb
         const API_ENDPOINT = window.location.hostname === 'localhost' 
             ? 'http://localhost:8888/.netlify/functions/search-imdb'
             : '/.netlify/functions/search-imdb';
 
         const person1NameInput = document.getElementById('person1Name');
-        const person1IdInput = document.getElementById('person1Id');
         const person2NameInput = document.getElementById('person2Name');
-        const person2IdInput = document.getElementById('person2Id');
         const searchBtn = document.getElementById('searchBtn');
         const loadingSection = document.getElementById('loadingSection');
         const resultsSection = document.getElementById('resultsSection');
@@ -370,27 +340,20 @@ Sortie
         const errorSection = document.getElementById('errorSection');
 
         searchBtn.addEventListener('click', searchCommonFilms);
-        person1IdInput.addEventListener('keypress', (e) => e.key === 'Enter' && searchCommonFilms());
-        person2IdInput.addEventListener('keypress', (e) => e.key === 'Enter' && searchCommonFilms());
+        person1NameInput.addEventListener('keypress', (e) => e.key === 'Enter' && searchCommonFilms());
+        person2NameInput.addEventListener('keypress', (e) => e.key === 'Enter' && searchCommonFilms());
 
         async function searchCommonFilms() {
             const name1 = person1NameInput.value.trim();
-            const id1 = person1IdInput.value.trim();
             const name2 = person2NameInput.value.trim();
-            const id2 = person2IdInput.value.trim();
 
-            if (!id1 || !id2) {
-                showError('Veuillez entrer les deux IDs IMDb (nm...)');
+            if (!name1 || !name2) {
+                showError('Veuillez entrer deux noms');
                 return;
             }
 
-            if (!id1.startsWith('nm') || !id2.startsWith('nm')) {
-                showError('Les IDs doivent commencer par "nm"');
-                return;
-            }
-
-            if (id1 === id2) {
-                showError('Entrez deux IDs différents');
+            if (name1.toLowerCase() === name2.toLowerCase()) {
+                showError('Entrez deux noms différents');
                 return;
             }
 
@@ -400,36 +363,44 @@ Sortie
             errorSection.style.display = 'none';
 
             try {
-                // Récupérer les filmographies directement via les IDs
+                const [id1, id2] = await Promise.all([
+                    searchPersonId(name1),
+                    searchPersonId(name2)
+                ]);
+
+                if (!id1) {
+                    showError(`Personne non trouvée: ${name1}`);
+                    return;
+                }
+
+                if (!id2) {
+                    showError(`Personne non trouvée: ${name2}`);
+                    return;
+                }
+
                 const [filmography1, filmography2] = await Promise.all([
-                    getFilmography(id1, name1 || 'Personne 1'),
-                    getFilmography(id2, name2 || 'Personne 2')
+                    getFilmography(id1),
+                    getFilmography(id2)
                 ]);
 
                 if (filmography1.length === 0) {
-                    showError(`Aucune filmographie trouvée pour l'ID: ${id1}`);
+                    showError(`Aucune filmographie trouvée pour: ${name1}`);
                     return;
                 }
 
                 if (filmography2.length === 0) {
-                    showError(`Aucune filmographie trouvée pour l'ID: ${id2}`);
+                    showError(`Aucune filmographie trouvée pour: ${name2}`);
                     return;
                 }
 
-                // Trouver les films en commun
-                const commonFilms = findCommonFilms(
-                    filmography1,
-                    filmography2,
-                    name1 || id1,
-                    name2 || id2
-                );
+                const commonFilms = findCommonFilms(filmography1, filmography2, name1, name2);
 
                 if (commonFilms.length === 0) {
-                    showError(`Aucun film en commun entre ces deux personnes`);
+                    showError(`Aucun film en commun entre ${name1} et ${name2}`);
                     return;
                 }
 
-                displayResults(commonFilms, name1 || id1, name2 || id2);
+                displayResults(commonFilms, name1, name2);
 
             } catch (error) {
                 console.error('Erreur:', error);
@@ -440,7 +411,36 @@ Sortie
             }
         }
 
-        async function getFilmography(personId, personName) {
+        async function searchPersonId(name) {
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        mode: 'search',
+                        query: name,
+                        maxResults: 5
+                    })
+                });
+
+                if (!response.ok) throw new Error('Erreur API');
+
+                const data = await response.json();
+
+                if (!data || data.length === 0) return null;
+
+                const person = data.find(item => item.id && item.id.startsWith('nm'));
+                return person ? person.id : null;
+
+            } catch (error) {
+                console.error('Erreur recherche ID:', error);
+                throw error;
+            }
+        }
+
+        async function getFilmography(personId) {
             try {
                 const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
@@ -463,17 +463,14 @@ Sortie
 
                 if (!data || data.length === 0) return [];
 
-                // Extraire les films
                 const films = [];
                 data.forEach(item => {
-                    // Chercher les films dans différents champs
                     if (item.filmography && Array.isArray(item.filmography)) {
                         item.filmography.forEach(film => {
                             films.push({
                                 id: film.id,
                                 title: film.title || film.name,
-                                year: film.year,
-                                type: film.type
+                                year: film.year
                             });
                         });
                     }
@@ -483,8 +480,7 @@ Sortie
                                 films.push({
                                     id: film.id,
                                     title: film.title || film.name,
-                                    year: film.year,
-                                    type: film.type
+                                    year: film.year
                                 });
                             }
                         });
@@ -494,7 +490,7 @@ Sortie
                 return films;
 
             } catch (error) {
-                console.error(`Erreur filmographie ${personId}:`, error);
+                console.error(`Erreur filmographie:`, error);
                 throw error;
             }
         }
@@ -515,7 +511,6 @@ Sortie
 
             return commonIds.map(id => {
                 const film1 = films1Map.get(id);
-                const film2 = films2Map.get(id);
 
                 return {
                     id: id,
@@ -559,7 +554,6 @@ Sortie
             resultsSection.classList.remove('show');
         }
 
-        // PWA Service Worker Registration
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('data:text/javascript;base64,Ly8gU2ltcGxlIFNlcnZpY2UgV29ya2VyIGZvciBPZmZsaW5lIFN1cHBvcnQ=').catch(() => {});
         }
