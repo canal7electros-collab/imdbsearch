@@ -2,7 +2,6 @@ const APIFY_API_KEY = process.env.APIFY_API_KEY || 'apify_api_aqUPfgOWbEaGSjRo9A
 const APIFY_API_URL = 'https://api.apify.com/v2/acts/logiover~imdb-scraper/run-sync-get-dataset-items';
 
 exports.handler = async (event) => {
-    // CORS headers
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
@@ -10,7 +9,6 @@ exports.handler = async (event) => {
         'Content-Type': 'application/json'
     };
 
-    // Handle preflight
     if (event.httpMethod === 'OPTIONS') {
         return { statusCode: 200, headers };
     }
@@ -36,12 +34,31 @@ exports.handler = async (event) => {
         if (searchType) payload.searchType = searchType;
         if (nameIds) payload.nameIds = nameIds;
 
-        console.log('Calling Apify with payload:', { ...payload, token: '***' });
-
         const response = await fetch(APIFY_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
-        console.log('Apify
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Apify API error: ${response.status} - ${errorText}`);
+        }
+
+        const data = await response.json();
+
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify(data)
+        };
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({ error: error.message })
+        };
+    }
+};
