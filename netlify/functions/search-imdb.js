@@ -36,30 +36,12 @@ exports.handler = async (event) => {
         if (searchType) payload.searchType = searchType;
         if (nameIds) payload.nameIds = nameIds;
 
+        console.log('Calling Apify with payload:', { ...payload, token: '***' });
+
         const response = await fetch(APIFY_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
-        if (!response.ok) {
-            throw new Error(`Apify API error: ${response.statusCode}`);
-        }
-
-        const data = await response.json();
-
-        return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify(data)
-        };
-
-    } catch (error) {
-        console.error('Error:', error);
-        return {
-            statusCode: 500,
-            headers,
-            body: JSON.stringify({ error: error.message })
-        };
-    }
-};
+        console.log('Apify
